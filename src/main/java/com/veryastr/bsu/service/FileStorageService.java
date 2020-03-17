@@ -5,7 +5,6 @@ import com.veryastr.bsu.dao.FileDao;
 import com.veryastr.bsu.dao.dto.FileDto;
 import com.veryastr.bsu.exceptions.FileStorageException;
 import com.veryastr.bsu.exceptions.MlCreatorFileNotFoundException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -40,7 +39,15 @@ public class FileStorageService {
     }
 
     public String storeFile(MultipartFile file) {
-        String filename = StringUtils.cleanPath(file.getOriginalFilename()).concat("-").concat(String.valueOf(System.currentTimeMillis()));
+        String filename = "";
+
+        if (file.getOriginalFilename() != null) {
+            int i = file.getOriginalFilename().lastIndexOf('.');
+            String name = file.getOriginalFilename().substring(0, i);
+            filename = StringUtils.cleanPath(file.getOriginalFilename().replace(name,name.concat("-").concat(String.valueOf(System.currentTimeMillis()))));
+        } else {
+            return filename;
+        }
 
         try {
             if (filename.contains("..")) {
@@ -55,6 +62,10 @@ public class FileStorageService {
         } catch (IOException e) {
             throw new FileStorageException("Cannot store the file: " + filename, e);
         }
+    }
+
+    public String getFullFilename(String filename) {
+        return fileStorageLocation.resolve(filename).toAbsolutePath().normalize().toString();
     }
 
     public void saveFileInfoToDatabase(String filename, String fileDownloadUri) {

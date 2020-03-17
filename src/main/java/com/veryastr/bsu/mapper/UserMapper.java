@@ -2,17 +2,20 @@ package com.veryastr.bsu.mapper;
 
 import com.veryastr.bsu.dao.dto.UserDto;
 import com.veryastr.bsu.model.User;
+import com.veryastr.bsu.model.UserWithPassword;
 import org.mapstruct.Mapper;
 
 import java.util.List;
 
 @Mapper
 public interface UserMapper {
-    UserDto toDto(User user);
+    UserDto toDto(UserWithPassword user);
 
-    User fromDto(UserDto dto);
+    UserWithPassword fromDtoToUserWithPassword(UserDto dto);
 
-    List<UserDto> toDtoList(List<User> user);
+    User fromDtoToUser(UserDto dto);
 
-    List<User> fromDtoList(List<UserDto> dto);
+    List<UserDto> toDtoList(List<UserWithPassword> user);
+
+    List<UserWithPassword> fromDtoList(List<UserDto> dto);
 }

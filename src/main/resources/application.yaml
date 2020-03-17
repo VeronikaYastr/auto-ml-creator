@@ -3,9 +3,13 @@ server:
   servlet:
     context-path: /auto-ml-creator/v1
 
+spark:
+  home:
+  master-uri: local[*]
+
 spring:
   datasource:
-    jdbc-url: jdbc:postgresql://localhost:5432/auto-ml-creator
+    jdbc-url: jdbc:postgresql://localhost:5432/automlcreatordb
     username: postgres
     password: password
   flyway:
@@ -17,7 +21,7 @@ spring:
       file-size-threshold: 2KB
       max-request-size: 1GB
 file:
-  upload-dir: /Users/veron/auto-ml-creator/uploads
+  upload-dir: /Users/veron/auto-ml-creator/uploads/
 logging:
   level:
     com.veryastr.bsu: debug

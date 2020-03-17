@@ -1,7 +1,7 @@
 package com.veryastr.bsu.controller;
 
 import com.veryastr.bsu.model.Id;
-import com.veryastr.bsu.model.User;
+import com.veryastr.bsu.model.UserWithPassword;
 import com.veryastr.bsu.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class UserController {
     private final UserService userService;
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public ResponseEntity<Id> createUser(@RequestBody User user) {
+    public ResponseEntity<Id> createUser(@RequestBody UserWithPassword user) {
         try {
             Id created = userService.createUser(user);
             log.debug("User <id={}> created.", created.getId());
@@ -35,9 +35,9 @@ public class UserController {
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ResponseEntity<List<User>> getUsersList() {
+    public ResponseEntity<List<UserWithPassword>> getUsersList() {
         try {
-            List<User> users = userService.getAllUsers();
+            List<UserWithPassword> users = userService.getAllUsers();
             log.debug("All users: {}.", users);
             return new ResponseEntity<>(users, HttpStatus.OK);
         } catch (Exception ex) {
@@ -47,9 +47,9 @@ public class UserController {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ResponseEntity<Id> login(@RequestBody User user) {
+    public ResponseEntity<Id> login(@RequestBody UserWithPassword user) {
         try {
-            User loggedUser = userService.login(user);
+            UserWithPassword loggedUser = userService.login(user);
             log.debug("User {} successfully logged in.", loggedUser.getUsername());
             Id result = new Id(loggedUser.getId());
             return new ResponseEntity<>(result, HttpStatus.OK);
