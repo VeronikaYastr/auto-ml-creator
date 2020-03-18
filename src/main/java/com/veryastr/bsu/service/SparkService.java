@@ -1,5 +1,6 @@
 package com.veryastr.bsu.service;
 
+import com.veryastr.bsu.exceptions.MlCreatorSparkException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Level;
@@ -7,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -32,19 +34,49 @@ public class SparkService {
         sparkSession.sparkContext().setLogLevel("INFO");
     }
 
-    public Dataset<Row> readFileIntoDataset(String filename) {
+    public Dataset<Row> readFileIntoDataset(String filename, String fileType) {
         String fullFilename = fileStorageService.getFullFilename(filename);
-        Dataset<Row> dfFromCSV = sparkSession.read()
-                .option("header", true)
-                .csv(fullFilename)
-                .as("Iris");
-        return dfFromCSV.cache();
+        Dataset<Row> dataset;
+
+        switch (fileType) {
+            case MediaType.APPLICATION_JSON_VALUE:
+                dataset = sparkSession.read()
+                        .option("multiline", "true")
+                        .json(fullFilename)
+                        .as("JSON File")
+                        .cache();
+                break;
+            case MediaType.TEXT_PLAIN_VALUE:
+                dataset = sparkSession.read()
+                        .text(fullFilename)
+                        .as("Text File")
+                        .cache();
+                break;
+            case MediaType.APPLICATION_OCTET_STREAM_VALUE:
+                dataset = sparkSession.read()
+                        .option("header", true)
+                        .csv(fullFilename)
+                        .as("CSV File")
+                        .cache();
+                break;
+            default:
+                throw new MlCreatorSparkException("Invalid file format: " + fileType + ". Supported formats: txt, csv, json.");
+        }
+        return dataset;
     }
 
     public UUID saveDatasetToCache(Dataset<Row> dataset) {
         UUID key = UUID.randomUUID();
         datasetMap.put(key, dataset);
         return key;
+    }
+
+    public Dataset<Row> getDatasetFromCache(UUID id) {
+        Dataset<Row> dataset = datasetMap.get(id);
+        if (dataset == null) {
+            throw new MlCreatorSparkException("Dataset is not found: " + id);
+        }
+        return dataset;
     }
 
     private static void readInDifferentFormats(SparkSession session) {

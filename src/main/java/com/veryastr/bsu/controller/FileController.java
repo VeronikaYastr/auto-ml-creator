@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,7 @@ public class FileController {
                 .path(filename)
                 .toUriString();
 
-        Dataset<Row> rows = sparkService.readFileIntoDataset(filename);
+        Dataset<Row> rows = sparkService.readFileIntoDataset(filename, Objects.requireNonNull(file.getContentType()));
         UUID datasetId = sparkService.saveDatasetToCache(rows);
         List<List<String>> firstLines = rows.limit(10).collectAsList().stream().map(x -> Arrays.asList(x.mkString(",").split(","))).collect(Collectors.toList());
 
